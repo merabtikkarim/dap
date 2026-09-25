@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Etudiant {
+  // Identifiants principaux
+  matEtudiant               String   @id @map("mat_etudiant")
+  nin                       String?  @map("nin")
+  matBac                    String?  @map("mat_bac")
+  anneeBac                  Int?     @map("annee_bac")
+  carteRfid                 String?  @map("carte_rfid")
+
+  // Informations personnelles (Français)
+  nom                       String
+  prenom                    String
+  civilite                  String?
+  sexe                      String?
+  dateNaissance             String?  @map("date_naissance")
+  lieuNaissance             String?  @map("lieu_naissance")
+  adresse                   String?
+  telephone                 String?
+  nationalite               String?  @default("Algerienne")
+  groupeSanguin             String?  @map("groupe_sanguin")
+  situationFamiliale        String?  @map("situation_familiale")
+
+  // Informations personnelles (Arabe)
+  nomAr                     String?  @map("nom_ar")
+  prenomAr                  String?  @map("prenom_ar")
+  lieuNaissanceAr           String?  @map("lieu_naissance_ar")
+  nationaliteAr             String?  @map("nationalite_ar")
+
+  // Informations parentales
+  prenomPere                String?  @map("prenom_pere")
+  prenomPereAr              String?  @map("prenom_pere_ar")
+  nomMere                   String?  @map("nom_mere")
+  nomMereAr                 String?  @map("nom_mere_ar")
+  prenomMere                String?  @map("prenom_mere")
+  prenomMereAr              String?  @map("prenom_mere_ar")
+
+  // Origine géographique & Baccalauréat
+  wilayaNaissance           String?  @map("wilaya_naissance")
+  wilayaBac                 String?  @map("wilaya_bac")
+  wilayaResidence           String?  @map("wilaya_residence")
+  villeNaissance            String?  @map("ville_naissance")
+  serieBac                  String?  @map("serie_bac")
+  libelleBac                String?  @map("libelle_bac")
+  moyenneBac                Float?   @map("moyenne_bac")
+
+  // Affectation & Inscription Académique
+  dateValidationInscription String?  @map("date_validation_inscription")
+  codeDomaine               String?  @map("code_domaine")
+  libelleDomaine            String?  @map("libelle_domaine")
+  libelleDomaineAr          String?  @map("libelle_domaine_ar")
+  codeFiliere               String?  @map("code_filiere")
+  libelleFiliere            String?  @map("libelle_filiere")
+  libelleFiliereAr          String?  @map("libelle_filiere_ar")
+  structure                 String?
+  codeNiveau                String?  @map("code_niveau")
+  codeCycle                 String?  @map("code_cycle")
+  libelleCycle              String?  @map("libelle_cycle")
+
+  // --- NOUVEAUX CHAMPS STRUCTURÉS ---
+  niveau                    String?  @map("niveau")          // ex: "2ème année"
+  niveauAr                  String?  @map("niveau_ar")       // ex: "السنة الثانية"
+  filiere                   String?  @map("filiere")         // ex: "PES", "PEM", "PEP"
+  filiereAr                 String?  @map("filiere_ar")      // ex: "أستاذ التعليم الثانوي"
+  specialite                String?  @map("specialite")      // ex: "Mathématiques"
+  specialiteAr              String?  @map("specialite_ar")   // ex: "الرياضيات"
+
+  // Statut & Frais
+  sitIns                    String?  @default("Validée") @map("sit_ins")
+  fraisInscriptionPaye      Boolean  @default(false) @map("frais_inscription_paye")
+  fraisTransportPaye        Boolean  @default(false) @map("frais_transport_paye")
+  redoublant                Boolean? @default(false)
+  transfert                 Boolean? @default(false)
+
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  @@map("etudiants")
+}
