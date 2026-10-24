@@ -6,6 +6,22 @@ datasource db {
   provider = "sqlite"
 }
 
+enum JourSemaine {
+  LUNDI
+  MARDI
+  MERCREDI
+  JEUDI
+  VENDREDI
+  SAMEDI
+  DIMANCHE
+}
+
+enum TypeCours {
+  CM
+  TD
+  TP
+}
+
 model Etudiant {
   // Identifiants principaux
   matEtudiant               String   @id @map("mat_etudiant")
@@ -64,12 +80,12 @@ model Etudiant {
   libelleCycle              String?  @map("libelle_cycle")
 
   // --- NOUVEAUX CHAMPS STRUCTURÉS ---
-  niveau                    String?  @map("niveau")          // ex: "2ème année"
-  niveauAr                  String?  @map("niveau_ar")       // ex: "السنة الثانية"
-  filiere                   String?  @map("filiere")         // ex: "PES", "PEM", "PEP"
-  filiereAr                 String?  @map("filiere_ar")      // ex: "أستاذ التعليم الثانوي"
-  specialite                String?  @map("specialite")      // ex: "Mathématiques"
-  specialiteAr              String?  @map("specialite_ar")   // ex: "الرياضيات"
+  niveau                    String?  @map("niveau")
+  niveauAr                  String?  @map("niveau_ar")
+  filiere                   String?  @map("filiere")
+  filiereAr                 String?  @map("filiere_ar")
+  specialite                String?  @map("specialite")
+  specialiteAr              String?  @map("specialite_ar")
 
   // Statut & Frais
   sitIns                    String?  @default("Validée") @map("sit_ins")
@@ -82,4 +98,83 @@ model Etudiant {
   updatedAt                 DateTime @updatedAt @map("updated_at")
 
   @@map("etudiants")
+}
+
+model Enseignant {
+  id                     String                   @id @default(cuid())
+  nom                    String
+  prenom                 String
+  email                  String?                  @unique
+  specialite             String?
+  grade                  String?
+  statut                 String?                  @default("Permanent")
+  maxCoursParJour        Int                      @default(3)
+  maxHeuresParSemaine    Int                      @default(18)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  disponibilites         DisponibiliteEnseignant[]
+  seances                Seance[]
+
+  @@map("enseignants")
+}
+
+model Salle {
+  id                     String                   @id @default(cuid())
+  nom                    String                   @unique
+  type                   String?                  @default("Amphi")
+  capacite               Int                      @default(30)
+  batiment               String?
+  numero                 String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  disponibilites         DisponibiliteSalle[]
+  seances                Seance[]
+
+  @@map("salles")
+}
+
+model DisponibiliteEnseignant {
+  id            String          @id @default(cuid())
+  enseignantId  String
+  jour          JourSemaine
+  heureDebut    String
+  heureFin      String
+  motif         String?
+  enseignant    Enseignant      @relation(fields: [enseignantId], references: [id], onDelete: Cascade)
+
+  @@unique([enseignantId, jour, heureDebut, heureFin])
+  @@map("disponibilites_enseignants")
+}
+
+model DisponibiliteSalle {
+  id            String          @id @default(cuid())
+  salleId       String
+  jour          JourSemaine
+  heureDebut    String
+  heureFin      String
+  motif         String?
+  salle         Salle           @relation(fields: [salleId], references: [id], onDelete: Cascade)
+
+  @@unique([salleId, jour, heureDebut, heureFin])
+  @@map("disponibilites_salles")
+}
+
+model Seance {
+  id            String       @id @default(cuid())
+  module        String
+  type          TypeCours
+  jour          JourSemaine
+  heureDebut    String
+  heureFin      String
+  groupe        String
+  filiere       String?
+  semestre      Int?
+  enseignantId  String?
+  salleId      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  enseignant    Enseignant?  @relation(fields: [enseignantId], references: [id], onDelete: SetNull)
+  salle         Salle?       @relation(fields: [salleId], references: [id], onDelete: SetNull)
+
+  @@map("seances")
 }
