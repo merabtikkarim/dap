@@ -35,6 +35,13 @@ const QUICK_ACTIONS: QuickAction[] = [
     accent: 'bg-primary/10 text-primary',
   },
   {
+    href: '/timetable',
+    icon: '🗓️',
+    title: 'Emploi du temps',
+    description: 'Gérer enseignants, salles, disponibilités, séances et générer le planning.',
+    accent: 'bg-success/10 text-success',
+  },
+  {
     href: '/impression-fiches',
     icon: '📄',
     title: 'Impression Fiches PDF',
@@ -163,7 +170,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* En-tête */}
       <div className="card bg-base-100 shadow-md border border-base-200">
         <div className="card-body flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
@@ -200,7 +206,6 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
-          {/* Statistiques principales */}
           <div className="stats shadow-md w-full stats-vertical lg:stats-horizontal bg-base-100 border border-base-200">
             <div className="stat">
               <div className="stat-figure text-primary text-2xl">👥</div>
@@ -239,7 +244,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Paiements (radial progress) */}
           <div className="card bg-base-100 shadow-md border border-base-200">
             <div className="card-body">
               <h3 className="card-title text-base">État des paiements</h3>
@@ -247,13 +251,11 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center gap-2">
                   <div
                     className="radial-progress text-success"
-                    style={
-                      {
-                        '--value': pct(stats.inscriptionPayee, stats.total),
-                        '--size': '7rem',
-                        '--thickness': '8px',
-                      } as React.CSSProperties
-                    }
+                    style={{
+                      '--value': pct(stats.inscriptionPayee, stats.total),
+                      '--size': '7rem',
+                      '--thickness': '8px',
+                    } as React.CSSProperties}
                     role="progressbar"
                   >
                     {pct(stats.inscriptionPayee, stats.total)}%
@@ -267,13 +269,11 @@ export default function DashboardPage() {
                 <div className="flex flex-col items-center gap-2">
                   <div
                     className="radial-progress text-accent"
-                    style={
-                      {
-                        '--value': pct(stats.transportPaye, stats.total),
-                        '--size': '7rem',
-                        '--thickness': '8px',
-                      } as React.CSSProperties
-                    }
+                    style={{
+                      '--value': pct(stats.transportPaye, stats.total),
+                      '--size': '7rem',
+                      '--thickness': '8px',
+                    } as React.CSSProperties}
                     role="progressbar"
                   >
                     {pct(stats.transportPaye, stats.total)}%
@@ -287,7 +287,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Répartitions */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <DistributionList
               title="🏫 Répartition par filière"
@@ -311,12 +310,11 @@ export default function DashboardPage() {
         </>
       )}
 
-      {/* Accès rapides */}
       <div>
         <h2 className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-3 px-1">
           Accès rapides
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {QUICK_ACTIONS.map((action) => (
             <Link
               key={action.href}
