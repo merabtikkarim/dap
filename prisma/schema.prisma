@@ -6,6 +6,12 @@ datasource db {
   provider = "sqlite"
 }
 
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
 enum JourSemaine {
   LUNDI
   MARDI
@@ -20,6 +26,151 @@ enum TypeCours {
   CM
   TD
   TP
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String?
+  name      String?
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model TimetableConfig {
+  id                String        @id @default(cuid())
+  sessionsPerDay    Int           @default(5)
+  weekStartsOn      JourSemaine   @default(DIMANCHE)
+  allowSixthSession Boolean       @default(false)
+  antiSameDayRule   Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("timetable_configs")
+}
+
+model TeacherAvailability {
+  id        String      @id @default(cuid())
+  teacherId String
+  day       JourSemaine
+  startTime String
+  endTime   String
+  reason    String?
+  createdAt DateTime    @default(now())
+
+  @@unique([teacherId, day, startTime, endTime])
+  @@map("teacher_availabilities")
+}
+
+model RoomAvailability {
+  id        String      @id @default(cuid())
+  roomId    String
+  day       JourSemaine
+  startTime String
+  endTime   String
+  reason    String?
+  createdAt DateTime    @default(now())
+
+  @@unique([roomId, day, startTime, endTime])
+  @@map("room_availabilities")
+}
+
+model Course {
+  id          String        @id @default(cuid())
+  code        String?       @unique
+  title       String?
+  description String?
+  module      String
+  type        TypeCours
+  groupName   String
+  semester    Int?
+  filiere     String?
+  niveau      String?
+  teacherId   String?
+  roomId      String?
+  day         JourSemaine?
+  startTime   String?
+  endTime     String?
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  teacher  Enseignant? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  room     Salle?      @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  cohortes CourseCohort[]
+
+  @@map("courses")
+}
+
+model Cohort {
+  id        String          @id @default(cuid())
+  name      String
+  year      Int
+  filiere   String?
+  niveau    String?
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  students CohortStudent[]
+  courses  CourseCohort[]
+
+  @@map("cohorts")
+}
+
+model CourseCohort {
+  id        String   @id @default(cuid())
+  courseId  String
+  cohortId  String
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, cohortId])
+  @@map("course_cohorts")
+}
+
+model CohortStudent {
+  id          String   @id @default(cuid())
+  cohortId    String
+  studentId   String
+  createdAt   DateTime @default(now())
+
+  cohort      Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  etudiant    Etudiant @relation(fields: [studentId], references: [matEtudiant], onDelete: Cascade)
+
+  @@unique([cohortId, studentId])
+  @@map("cohort_students")
+}
+
+model MoodleConfig {
+  id         String    @id @default(cuid())
+  baseUrl    String
+  token      String
+  enabled    Boolean   @default(false)
+  lastSyncAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("moodle_config")
 }
 
 model Etudiant {
@@ -94,6 +245,8 @@ model Etudiant {
   redoublant                Boolean? @default(false)
   transfert                 Boolean? @default(false)
 
+  cohortes                  CohortStudent[]
+
   createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @updatedAt @map("updated_at")
 
@@ -114,6 +267,7 @@ model Enseignant {
   updatedAt              DateTime                 @updatedAt
   disponibilites         DisponibiliteEnseignant[]
   seances                Seance[]
+  courses                Course[]
 
   @@map("enseignants")
 }
@@ -129,6 +283,7 @@ model Salle {
   updatedAt              DateTime                 @updatedAt
   disponibilites         DisponibiliteSalle[]
   seances                Seance[]
+  courses                Course[]
 
   @@map("salles")
 }
